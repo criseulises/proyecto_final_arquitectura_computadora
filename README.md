@@ -4,7 +4,12 @@
 
 - **Materia:** Arquitectura de Computadores
 - **Grupo:** The blutus duais
-- **Integrantes:** Cristian Eulises Sanchez Ramirez
+- **Integrantes:**
+  - Alejandro Bruno De Oleo
+  - Cristian Alberto Tejeda Rojas
+  - Cristian Eulises Sanchez Ramirez
+  - Hansel Augusto Perez Espinosa
+  - Lia Johanna De Oleo Cuello
 
 ---
 
