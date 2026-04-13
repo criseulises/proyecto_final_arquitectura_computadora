@@ -1,6 +1,6 @@
 """
 Servidor Flask para el Simulador de Pipeline RISC.
-Grupo: The blutus duais
+Grupo: De blutus duais
 Materia: Arquitectura de Computadores
 """
 

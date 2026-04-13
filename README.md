@@ -3,7 +3,7 @@
 ## Informacion del Proyecto
 
 - **Materia:** Arquitectura de Computadores
-- **Grupo:** The blutus duais
+- **Grupo:** De blutus duais
 - **Integrantes:**
   - Alejandro Bruno De Oleo
   - Cristian Alberto Tejeda Rojas

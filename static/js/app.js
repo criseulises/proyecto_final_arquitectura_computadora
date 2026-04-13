@@ -1,6 +1,6 @@
 /**
  * Simulador de Pipeline RISC - Frontend
- * Grupo: The blutus duais
+ * Grupo: De blutus duais
  * Arquitectura de Computadores
  */
 
