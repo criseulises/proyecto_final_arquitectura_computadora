@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Pipeline RISC | The blutus duais</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-title">
+        <h1>Simulador de Pipeline RISC</h1>
+        <span class="subtitle">5 Etapas: FI - DI - EXE - MEM - WB</span>
+    </div>
+    <span class="header-badge">The blutus duais | Arquitectura de Computadores</span>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="main-container">
+
+    <!-- PANEL IZQUIERDO: Editor + Controles -->
+    <div class="left-panel">
+        <!-- Ejemplos -->
+        <div class="panel-section">
+            <h3>Programas de Ejemplo</h3>
+            <div class="examples-list" id="examples-list">
+                <!-- Se cargan dinamicamente -->
+            </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="panel-section">
+            <h3>Controles</h3>
+            <div class="controls">
+                <button class="btn btn-primary" id="btn-simulate" title="Ejecutar simulacion completa">
+                    Simular
+                </button>
+                <button class="btn btn-success" id="btn-play" disabled title="Reproducir automaticamente">
+                    Play
+                </button>
+                <button class="btn btn-warning" id="btn-step" disabled title="Avanzar un ciclo">
+                    Paso
+                </button>
+                <button class="btn btn-danger" id="btn-reset" disabled title="Reiniciar simulacion">
+                    Reset
+                </button>
+            </div>
+            <div class="toggle-group">
+                <input type="checkbox" class="toggle" id="toggle-forwarding">
+                <label for="toggle-forwarding">Data Forwarding</label>
+            </div>
+            <div class="speed-control">
+                <label>Velocidad:</label>
+                <input type="range" class="speed-slider" id="speed-slider" min="100" max="2000" value="800" step="100">
+                <span class="speed-value" id="speed-value">800ms</span>
+            </div>
+        </div>
+
+        <!-- Editor de Codigo -->
+        <div class="code-editor-wrapper">
+            <h3>Codigo Ensamblador</h3>
+            <textarea id="code-editor" spellcheck="false" placeholder="# Escribe tu codigo ensamblador aqui...
+# Ejemplo:
+ADDI $t0, $zero, 10
+ADDI $t1, $zero, 20
+NOP
+NOP
+ADD $t2, $t0, $t1
+HALT"></textarea>
+        </div>
+    </div>
+
+    <!-- PANEL DERECHO: Visualizacion -->
+    <div class="right-panel">
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="tab-pipeline">Pipeline</button>
+            <button class="tab" data-tab="tab-table">Diagrama Temporal</button>
+            <button class="tab" data-tab="tab-stats">Estadisticas</button>
+        </div>
+
+        <!-- Tab: Pipeline Visual -->
+        <div class="tab-content">
+            <div class="tab-pane active" id="tab-pipeline">
+                <div id="pipeline-empty" class="empty-state">
+                    <div class="empty-icon">&#9881;</div>
+                    <h3>Pipeline RISC de 5 Etapas</h3>
+                    <p>Escribe codigo ensamblador y presiona "Simular" para visualizar el pipeline.</p>
+                </div>
+
+                <div id="pipeline-view" style="display:none;">
+                    <!-- Error display -->
+                    <div class="error-display" id="error-display"></div>
+
+                    <!-- Cycle counter -->
+                    <div class="cycle-display">
+                        <div class="cycle-label">Ciclo</div>
+                        <div class="cycle-number" id="cycle-number">0</div>
+                    </div>
+
+                    <!-- Hazard alert -->
+                    <div class="hazard-alert" id="hazard-alert">
+                        <div class="hazard-title" id="hazard-title">HAZARD DETECTADO</div>
+                        <div class="hazard-detail" id="hazard-detail"></div>
+                    </div>
+
+                    <!-- Branch alert -->
+                    <div class="branch-alert" id="branch-alert">
+                        <div class="branch-title">SALTO TOMADO - Pipeline flushed</div>
+                    </div>
+
+                    <!-- Pipeline diagram -->
+                    <div class="pipeline-diagram">
+                        <div class="stage-box stage-fi" id="stage-fi">
+                            <div class="stage-label">Fetch</div>
+                            <div class="stage-name">FI</div>
+                            <div class="stage-instr stage-empty" id="fi-instr">---</div>
+                        </div>
+                        <div class="stage-arrow">&#8594;</div>
+                        <div class="stage-box stage-di" id="stage-di">
+                            <div class="stage-label">Decode</div>
+                            <div class="stage-name">DI</div>
+                            <div class="stage-instr stage-empty" id="di-instr">---</div>
+                        </div>
+                        <div class="stage-arrow">&#8594;</div>
+                        <div class="stage-box stage-exe" id="stage-exe">
+                            <div class="stage-label">Execute</div>
+                            <div class="stage-name">EXE</div>
+                            <div class="stage-instr stage-empty" id="exe-instr">---</div>
+                        </div>
+                        <div class="stage-arrow">&#8594;</div>
+                        <div class="stage-box stage-mem" id="stage-mem">
+                            <div class="stage-label">Memory</div>
+                            <div class="stage-name">MEM</div>
+                            <div class="stage-instr stage-empty" id="mem-instr">---</div>
+                        </div>
+                        <div class="stage-arrow">&#8594;</div>
+                        <div class="stage-box stage-wb" id="stage-wb">
+                            <div class="stage-label">Write Back</div>
+                            <div class="stage-name">WB</div>
+                            <div class="stage-instr stage-empty" id="wb-instr">---</div>
+                        </div>
+                    </div>
+
+                    <!-- Registros -->
+                    <div style="margin-top: 2rem;">
+                        <h3 style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">Registros</h3>
+                        <div class="registers-grid" id="registers-grid">
+                            <!-- Se genera dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Memoria -->
+                    <div class="memory-section">
+                        <h3>Memoria</h3>
+                        <div id="memory-grid" class="memory-grid">
+                            <p class="memory-empty">Sin accesos a memoria</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Tabla Temporal -->
+            <div class="tab-pane" id="tab-table">
+                <div id="table-empty" class="empty-state">
+                    <div class="empty-icon">&#9638;</div>
+                    <h3>Diagrama Temporal</h3>
+                    <p>Ejecuta una simulacion para ver el diagrama temporal del pipeline.</p>
+                </div>
+                <div id="table-view" style="display:none;">
+                    <div class="pipeline-table-wrapper">
+                        <table class="pipeline-table" id="pipeline-table">
+                            <!-- Se genera dinamicamente -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Estadisticas -->
+            <div class="tab-pane" id="tab-stats">
+                <div id="stats-empty" class="empty-state">
+                    <div class="empty-icon">&#9776;</div>
+                    <h3>Estadisticas</h3>
+                    <p>Ejecuta una simulacion para ver las estadisticas de rendimiento.</p>
+                </div>
+                <div id="stats-view" style="display:none;">
+                    <div class="stats-grid" id="stats-grid">
+                        <!-- Se genera dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading -->
+<div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Simulando pipeline...</p>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
